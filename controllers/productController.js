@@ -46,14 +46,21 @@ const productController = {
                 // rootfolder/uploads/filename.png
             }
 
-            const { name, price, size } = req.body;
+            const { id, name, price, stock, colors, category, company, description, featured, shipping } = req.body;
             let document;
             try {
                 document = await Product.create({
+                    id,
                     name,
                     price,
-                    size,
+                    stock,
                     image: filePath,
+                    colors,
+                    category,
+                    company,
+                    description,
+                    featured,
+                    shipping,
                 });
             } catch (err) {
                 return next(err);
@@ -89,15 +96,22 @@ const productController = {
                 // rootfolder/uploads/filename.png
             }
 
-            const { name, price, size } = req.body;
+            const { id, name, price, stock, colors, category, company, description, featured, shipping } = req.body;
             let document;
             try {
                 document = await Product.findOneAndUpdate(
                     { _id: req.params.id },
                     {
+                        id,
                         name,
                         price,
-                        size,
+                        stock,
+                        colors,
+                        category,
+                        company,
+                        description,
+                        featured,
+                        shipping,
                         ...(req.file && { image: filePath }),
                     },
                     { new: true }
@@ -129,7 +143,7 @@ const productController = {
         // pagination mongoose-pagination
         try {
             documents = await Product.find()
-                .select('-updatedAt -__v')
+                .select('-updatedAt -__v -createdAt -_id')
                 .sort({ _id: -1 });
         } catch (err) {
             return next(CustomErrorHandler.serverError());
