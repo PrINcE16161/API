@@ -5,6 +5,7 @@ import CustomErrorHandler from '../services/CustomErrorHandler';
 import fs from 'fs';
 import Joi from 'joi';
 import productSchema from '../validators/productValidator';
+import { APP_URL } from '../config';
 
 const storage = multer.diskStorage({
     destination: (req, file, cb) => cb(null, 'uploads/'),
@@ -20,7 +21,7 @@ const storage = multer.diskStorage({
 const handleMultipartData = multer({
     storage,
     limits: { fileSize: 1000000 * 5 },
-}).single('image'); // 5mb
+}).array('image'); // 5mb
 
 const productController = {
     async store(req, res, next) {
@@ -29,7 +30,8 @@ const productController = {
             if (err) {
                 return next(CustomErrorHandler.serverError(err.message));
             }
-            const filePath = req.file.path;
+
+            const filePath = req.files.path;
             // validation
             const { error } = productSchema.validate(req.body);
             if (error) {
@@ -46,21 +48,27 @@ const productController = {
                 // rootfolder/uploads/filename.png
             }
 
-            const { id, name, price, stock, colors, category, company, description, featured, shipping } = req.body;
+            const { id, name, price, stock, colors, category, company, description, featured, shipping, reviews, stars } = req.body;
             let document;
             try {
+                var arrImages = [];
+                for (let i = 0; i < req.files.length; i++) {
+                    arrImages[i] = `uploads/` + req.files[i].filename;
+                }
                 document = await Product.create({
                     id,
                     name,
                     price,
                     stock,
-                    image: filePath,
+                    image: arrImages,
                     colors,
                     category,
                     company,
                     description,
                     featured,
                     shipping,
+                    reviews,
+                    stars,
                 });
             } catch (err) {
                 return next(err);
@@ -96,7 +104,7 @@ const productController = {
                 // rootfolder/uploads/filename.png
             }
 
-            const { id, name, price, stock, colors, category, company, description, featured, shipping } = req.body;
+            const { id, name, price, stock, colors, category, company, description, featured, shipping, reviews, stars } = req.body;
             let document;
             try {
                 document = await Product.findOneAndUpdate(
@@ -112,7 +120,9 @@ const productController = {
                         description,
                         featured,
                         shipping,
-                        ...(req.file && { image: filePath }),
+                        reviews,
+                        stars,
+                        ...(req.file && { image: arrImages/*filePath*/ }),
                     },
                     { new: true }
                 );

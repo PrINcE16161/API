@@ -11,20 +11,15 @@ const productSchema = new Schema(
         colors: { type: Array, required: true },
         stock: { type: String, required: true },
         image: {
-            type: String,
+            type: Array,
             required: true,
-            get: (image) => {
-                // http://localhost:5000/uploads/1616443169266-52350494.png
-                if (process.env.ON_HEROKU == 'true') {
-                    return `${image}`;
-                }
-                return `${APP_URL}/${image}`;
-            },
         },
         description: { type: String, required: true },
         category: { type: String, required: true },
         featured: { type: Boolean, default: true },
         shipping: { type: Boolean, default: true },
+        reviews: { type: String, required: true },
+        stars: { type: String, required: true },
     },
     { timestamps: true, toJSON: { getters: true }, id: false }
 );
