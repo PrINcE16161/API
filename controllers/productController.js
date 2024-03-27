@@ -3,7 +3,6 @@ import multer from 'multer';
 import path from 'path';
 import CustomErrorHandler from '../services/CustomErrorHandler';
 import fs from 'fs';
-import Joi from 'joi';
 import productSchema from '../validators/productValidator';
 import { APP_URL } from '../config';
 
@@ -53,7 +52,7 @@ const productController = {
             try {
                 var arrImages = [];
                 for (let i = 0; i < req.files.length; i++) {
-                    arrImages[i] = `uploads/` + req.files[i].filename;
+                    arrImages[i] = `${APP_URL}/uploads/` + req.files[i].filename;
                 }
                 document = await Product.create({
                     id,
@@ -108,7 +107,7 @@ const productController = {
             let document;
             try {
                 document = await Product.findOneAndUpdate(
-                    { _id: req.params.id },
+                    { id: req.params.id },
                     {
                         id,
                         name,
@@ -163,7 +162,7 @@ const productController = {
     async show(req, res, next) {
         let document;
         try {
-            document = await Product.findOne({ _id: req.params.id }).select(
+            document = await Product.findOne({ id: req.params.id }).select(
                 '-updatedAt -__v'
             );
         } catch (err) {
@@ -175,7 +174,7 @@ const productController = {
         let documents;
         try {
             documents = await Product.find({
-                _id: { $in: req.body.ids },
+                id: { $in: req.body.ids },
             }).select('-updatedAt -__v');
         } catch (err) {
             return next(CustomErrorHandler.serverError());
